@@ -1,0 +1,135 @@
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script type="text/javascript">
+var meeting = {};
+var events = [];
+
+function showMeeting(parentElementId) {
+  const el = document.createElement('iframe');
+  el.setAttribute('allowFullScreen', true);
+  el.setAttribute('allowTransparency', true);
+  el.setAttribute('allow', "camera; microphone");
+  el.setAttribute('height', "400px");
+  el.setAttribute('width', "500px");
+  el.setAttribute('id', 'meeting_window');
+  el.setAttribute('src', meeting.join_links ? meeting.join_links["ashish@saleassist.ai"] : "");
+
+  if (parentElementId) {
+    document.querySelector("#" + parentElementId).replaceWith(el);
+  } else {
+    document.body.appendChild(el);
+  }
+}
+
+function joinMeeting() {
+  showMeeting("meeting_window");
+}
+
+function fetchEvents() {
+  axios
+    .get("http://localhost:8000/events")
+    .then((response) => {
+      events = response.data;
+      document.querySelector("#stats").innerHTML = events.join('<br />');
+    })
+    .catch((error) => {
+      console.log("Events fetch failed.");
+    });
+}
+
+function flushEvents() {
+  axios
+    .get("http://localhost:8000/flush_events")
+    .then((response) => {
+      events = response.data;
+      document.querySelector("#stats").innerHTML = events.join('<br />');
+    })
+    .catch((error) => {
+      console.log("Events flush failed.");
+    });
+}
+
+function getMeetingDocument() {
+  axios
+    .get("http://localhost:8000/get_meeting_document/" + meeting.id)
+    .then((response) => {
+      document.querySelector("#meeting_document").textContent = response.data;
+    })
+    .catch((error) => {
+      console.log("Meeting document could not be fetched.");
+    });
+}
+
+setInterval(fetchEvents, 1000);
+
+function endMeeting() {
+  axios
+    .get("http://localhost:8000/end_meeting/" + meeting.id)
+    .then((response) => {
+      if(response.data == "failed") {
+        alert("Failed!");
+        return;
+      }
+      meeting = response.data;
+      console.log(meeting);
+      alert("meeting stopped");
+    })
+    .catch((error) => {
+      alert("Failed!");
+    });
+}
+
+function startMeeting() {
+  axios
+    .get("http://localhost:8000/start_meeting/" + meeting.id)
+    .then((response) => {
+      if(response.data == "failed") {
+        alert("Failed!");
+        return;
+      }
+      meeting = response.data;
+      console.log(meeting);
+      alert("meeting started");
+    })
+    .catch((error) => {
+      alert("Failed!");
+    });
+}
+
+function createMeeting() {
+  var meeting_model = {
+    meeting_type: "conference",
+    participants: ["9158136816", "any_identifier_in_my_db", "nanotkarashish@gmail.com"]
+  }
+  axios
+    .post("http://localhost:8000/create_meeting", meeting_model)
+    .then((response) => {
+      if(response.data == "failed") {
+        alert("Failed!");
+        return;
+      }
+      meeting = response.data;
+      console.log(meeting);
+      alert("meeting created");
+    })
+    .catch((error) => {
+      alert("Failed!");
+    });
+}
+
+</script>
+<div>Watch stats here:</div><br>
+<div id="stats"></div><br>
+<button onclick="flushEvents()">flush events</button><br /><br />
+<button onclick="createMeeting()">create meeting</button>&nbsp;&nbsp;<button onclick="startMeeting()">start meeting</button>&nbsp;&nbsp;<button onclick="endMeeting()">stop meeting</button>
+<br>
+<br>
+<button onclick="joinMeeting()">Join meeting</button>
+<br>
+<br>
+<div id="meeting_window" style="width: 500px; height: 400px;">
+</div>
+<br /><br /><button onclick="getMeetingDocument()">Show meeting document</button>
+<br /><br />
+<pre id="meeting_document">
+</pre>
