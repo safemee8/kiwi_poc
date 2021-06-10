@@ -42,7 +42,7 @@ def api_ping():
 
 @app.get("/")
 def homepage():
-    return HTMLResponse(templates.get_template("index.html").render())
+    return HTMLResponse(templates.get_template("index.html").render({"port": 8002}))
 
 
 @app.post("/webhook")
@@ -51,7 +51,8 @@ async def capture_events(request: Request):
     if type(request_body) is bytes:
         request_body = request_body.decode('utf-8')
         try:
-            events.append(json.loads(request_body)["event_type"])
+            response = json.loads(request_body)
+            events.append(response["event_type"] + " " + response["payload"]["id"])
             print(json.dumps(json.loads(request_body), indent=4))
             print(events)
             return True

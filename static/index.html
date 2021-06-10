@@ -27,7 +27,7 @@ function joinMeeting() {
 
 function fetchEvents() {
   axios
-    .get("http://localhost:8000/events")
+    .get("http://localhost:{{ port }}/events")
     .then((response) => {
       events = response.data;
       document.querySelector("#stats").innerHTML = events.join('<br />');
@@ -39,7 +39,7 @@ function fetchEvents() {
 
 function flushEvents() {
   axios
-    .get("http://localhost:8000/flush_events")
+    .get("http://localhost:{{ port }}/flush_events")
     .then((response) => {
       events = response.data;
       document.querySelector("#stats").innerHTML = events.join('<br />');
@@ -51,7 +51,7 @@ function flushEvents() {
 
 function getMeetingDocument() {
   axios
-    .get("http://localhost:8000/get_meeting_document/" + meeting.id)
+    .get("http://localhost:{{ port }}/get_meeting_document/" + meeting.id)
     .then((response) => {
       document.querySelector("#meeting_document").textContent = response.data;
     })
@@ -64,35 +64,35 @@ setInterval(fetchEvents, 1000);
 
 function endMeeting() {
   axios
-    .get("http://localhost:8000/end_meeting/" + meeting.id)
+    .get("http://localhost:{{ port }}/end_meeting/" + meeting.id)
     .then((response) => {
       if(response.data == "failed") {
-        alert("Failed!");
+        console.log("Failed!");
         return;
       }
       meeting = response.data;
       console.log(meeting);
-      alert("meeting stopped");
+      console.log("meeting stopped");
     })
     .catch((error) => {
-      alert("Failed!");
+      console.log("Failed!");
     });
 }
 
 function startMeeting() {
   axios
-    .get("http://localhost:8000/start_meeting/" + meeting.id)
+    .get("http://localhost:{{ port }}/start_meeting/" + meeting.id)
     .then((response) => {
       if(response.data == "failed") {
-        alert("Failed!");
+        console.log("Failed!");
         return;
       }
       meeting = response.data;
       console.log(meeting);
-      alert("meeting started");
+      console.log("meeting started");
     })
     .catch((error) => {
-      alert("Failed!");
+      console.log("Failed!");
     });
 }
 
@@ -102,18 +102,18 @@ function createMeeting() {
     participants: ["9158136816", "any_identifier_in_my_db", "nanotkarashish@gmail.com"]
   }
   axios
-    .post("http://localhost:8000/create_meeting", meeting_model)
+    .post("http://localhost:{{ port }}/create_meeting", meeting_model)
     .then((response) => {
       if(response.data == "failed") {
-        alert("Failed!");
+        console.log("Failed!");
         return;
       }
       meeting = response.data;
       console.log(meeting);
-      alert("meeting created");
+      console.log("meeting created");
     })
     .catch((error) => {
-      alert("Failed!");
+      console.log("Failed!");
     });
 }
 
